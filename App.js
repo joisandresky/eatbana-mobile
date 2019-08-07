@@ -23,6 +23,8 @@ import Register from "./src/screens/Register/Register";
 import Discover from "./src/screens/Discover/Discover";
 import Search from "./src/screens/Search/Search";
 import Profile from "./src/screens/Profile/Profile";
+import Restaurant from './src/screens/Restaurant/Restaurant';
+import SearchResult from './src/screens/Search/SearchResult/SearchResult';
 
 const AppTabNav = createBottomTabNavigator({
   Discover: {
@@ -80,6 +82,12 @@ const AppStackNavigator = createStackNavigator({
     navigationOptions: {
       header: null
     }
+  },
+  Restaurant: {
+    screen: Restaurant
+  },
+  SearchResult: {
+    screen: SearchResult
   }
 }, {
     initialRouteName: 'AppTab'
