@@ -34,7 +34,7 @@ class Discover extends Component {
     fetchNearBy = () => {
         navigator.geolocation.getCurrentPosition(position => {
             if (position) {
-                this.props.dispatch(doGetNearby({ page: 1, limit: 10, lat: -6.168554876235899, lng: 106.72054241634976, search: '' }, response => {
+                this.props.dispatch(doGetNearby({ page: 1, limit: 10, lat: position.coords.latitude, lng: position.coords.longitude, search: '' }, response => {
                     console.log('response nearby', response);
                     this.setState({
                         restaurants: response.restaurant,
