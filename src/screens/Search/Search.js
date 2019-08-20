@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Alert } from 'react-native';
 import { Container, Header, Item, Input, Icon, Button, Text, Content, Accordion, List, ListItem, CheckBox, Body } from 'native-base';
 import { connect } from "react-redux";
-import { doGetNearby } from '../../redux/reducers/restaurantReducer';
+import { doGetNearby, doSetCriteria } from '../../redux/reducers/restaurantReducer';
 import Nearby from "../Discover/Nearby/Nearby";
 import { debounce } from "lodash";
 
@@ -69,19 +69,46 @@ class Search extends Component {
     // }, 1000);
 
     _onCheckPrice = index => {
-        let criterias = [...this.state.priceCriterias];
-        criterias[index].checked = !criterias[index].checked;
-        this.setState({
-            priceCriterias: criterias
-        });
+        let fi = this.state.priceCriterias.findIndex(p => p.checked);
+        if (fi > -1 && this.state.priceCriterias[fi].value === this.state.priceCriterias[index].value) {
+            let criterias = [...this.state.priceCriterias];
+            criterias[index].checked = !criterias[index].checked;
+            this.setState({
+                priceCriterias: criterias
+            });
+            return;
+        } else {
+            let criterias = [
+                { checked: false, title: "< 10.000", value: "price_under_10" },
+                { checked: false, title: "10.000 - 20.000", value: "price_10_to_20" },
+                { checked: false, title: "> 20.000", value: "price_more_20" }
+            ];
+            criterias[index].checked = !criterias[index].checked;
+            this.setState({
+                priceCriterias: criterias
+            });
+        }
     }
 
     _onCheckDistance = index => {
-        let criterias = [...this.state.distanceCriterias];
-        criterias[index].checked = !criterias[index].checked;
-        this.setState({
-            distanceCriterias: criterias
-        });
+        let fi = this.state.distanceCriterias.findIndex(p => p.checked);
+        if (fi > -1 && this.state.distanceCriterias[fi].value === this.state.distanceCriterias[index].value) {
+            let criterias = [...this.state.distanceCriterias];
+            criterias[index].checked = !criterias[index].checked;
+            this.setState({
+                distanceCriterias: criterias
+            });
+        } else {
+            let criterias = [
+                { checked: false, title: "< 1 KM", value: "distance_under_1km" },
+                { checked: false, title: "1 - 2 KM", value: "distance_1_to_2km" },
+                { checked: false, title: "> 2 KM", value: "distance_more_2km" }
+            ];
+            criterias[index].checked = !criterias[index].checked;
+            this.setState({
+                distanceCriterias: criterias
+            });
+        }
     }
 
     _onCheckFacilities = index => {
@@ -93,11 +120,24 @@ class Search extends Component {
     }
 
     _onCheckCapacity = index => {
-        let criterias = [...this.state.capacityCriterias];
-        criterias[index].checked = !criterias[index].checked;
-        this.setState({
-            capacityCriterias: criterias
-        });
+        let fi = this.state.capacityCriterias.findIndex(p => p.checked);
+        if (fi > -1 && this.state.capacityCriterias[fi].value === this.state.capacityCriterias[index].value) {
+            let criterias = [...this.state.capacityCriterias];
+            criterias[index].checked = !criterias[index].checked;
+            this.setState({
+                capacityCriterias: criterias
+            });
+        } else {
+            let criterias = [
+                { checked: false, title: "< 100", value: "capacity_under_100" },
+                { checked: false, title: "100 - 300", value: "capacity_100_to_300" },
+                { checked: false, title: "> 300", value: "capacity_more_300" }
+            ];
+            criterias[index].checked = !criterias[index].checked;
+            this.setState({
+                capacityCriterias: criterias
+            });
+        }
     }
 
     _renderContent = (item) => {
@@ -174,7 +214,34 @@ class Search extends Component {
     }
 
     onSearchCriteria = () => {
-        this.props.navigation.navigate('SearchResult');
+        let { priceCriterias, distanceCriterias, facilityCriterias, capacityCriterias } = this.state;
+        let totalPriceCriteria = priceCriterias.filter(p => p.checked);
+        let totalDistanceCriteria = distanceCriterias.filter(p => p.checked);
+        let totalFacilitiesCriteria = facilityCriterias.filter(p => p.checked);
+        let totalCapacityCriteria = capacityCriterias.filter(p => p.checked);
+        let total = totalPriceCriteria.length + totalDistanceCriteria.length + totalDistanceCriteria.length + totalFacilitiesCriteria.length + totalCapacityCriteria.length;
+
+        if (total === 0) {
+            Alert.alert(
+                'Kriteria Kosong',
+                'Maaf Kriteria tidak Boleh Kosong!',
+                [
+                    {
+                        text: 'OK', onPress: () => console.log('OKE')
+                    },
+                ],
+                { cancelable: false },
+            )
+        } else {
+            let data = {
+                price: totalPriceCriteria.length > 0 ? totalPriceCriteria[0] : null,
+                distance: totalDistanceCriteria.length > 0 ? totalDistanceCriteria[0] : null,
+                facility: totalFacilitiesCriteria,
+                capacity: totalCapacityCriteria.length > 0 ? totalCapacityCriteria[0] : null
+            };
+            this.props.dispatch(doSetCriteria(data));
+            this.props.navigation.navigate('SearchResult', { params: JSON.stringify(data) });
+        }
     }
 
     render() {

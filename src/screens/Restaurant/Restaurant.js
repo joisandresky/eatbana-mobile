@@ -19,10 +19,7 @@ class Restaurant extends Component {
   state = {
     restaurant: {},
     onReservation: false,
-    openHours: {
-      open: new Date(),
-      close: new Date()
-    },
+    openHours: {},
     day: [
       {
         name: 'Senin',
@@ -92,14 +89,15 @@ class Restaurant extends Component {
       let thisDay = days.findIndex(day => day.value === new Date().getDay());
       let daysOpen = hours.map(hour => hour.day);
       if (daysOpen.indexOf(days[thisDay].name) > -1) {
-        let findDay = hours.findIndex(hour => hour.day.toLowerCase() === days[thisDay].name);
+        let findDay = hours.findIndex(hour => hour.day.toLowerCase() === days[thisDay].name.toLowerCase());
+        console.log(hours[findDay].startHours, moment(hours[findDay].startHours).format("HH:mm"));
         if (findDay > -1) {
           this.setState({
             openHours: {
               open: hours[findDay].startHours,
               close: hours[findDay].endHours
             }
-          })
+          });
         }
       }
       return daysOpen.indexOf(days[thisDay].name) > -1 ? 'open' : 'closed';
@@ -109,74 +107,7 @@ class Restaurant extends Component {
   }
 
   onReserve = () => {
-    Alert.alert(
-      'Reservasi',
-      'Apakah kamu yakin ingin Mereservasi Restaurant ini ? (Restaurant ini hanya tersedia untuk reservasi pada Jam 7 Malam)',
-      [
-        {
-          text: 'Batal',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {
-          text: 'Pesan Sekarang!', onPress: () => {
-            this.setState({
-              onReservation: true
-            });
-            let tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            tomorrow.setHours(19, 0, 0, 0);
-            let body = {
-              bookDate: tomorrow,
-              session: "dinner",
-              timeSlot: tomorrow,
-              guest: {
-                firstName: this.props.guest.name,
-                lastName: '',
-                user: this.props.guest.user._id,
-                guest: this.props.guest._id
-              },
-              status: "new"
-            };
-
-            Axios.post("http://eatbana.herokuapp.com/api/reservations", body)
-              .then(res => {
-                console.log('res', res);
-                this.setState({
-                  onReservation: false
-                });
-                Alert.alert(
-                  'Berhasil',
-                  'Kamu berhasil melakukan reservasi',
-                  [
-                    {
-                      text: 'OK',
-                      onPress: () => console.log('ok')
-                    }
-                  ]
-                )
-              })
-              .catch(err => {
-                this.setState({
-                  onReservation: false
-                });
-                console.log('err', err);
-                Alert.alert(
-                  'Gagal',
-                  'Kamu gagal melakukan reservasi',
-                  [
-                    {
-                      text: 'OK',
-                      onPress: () => console.log('ok')
-                    }
-                  ]
-                )
-              });
-          }
-        },
-      ],
-      { cancelable: false },
-    );
+    this.props.navigation.navigate('CreateReservation', { id: this.props.navigation.getParam('id', '-1') });
   }
 
   render() {
@@ -187,7 +118,7 @@ class Restaurant extends Component {
           {this.props.onLoading ? <ActivityIndicator size="large" color="#000" /> : (
             <React.Fragment>
               <View style={{ minHeight: 200, height: 200, width: '100%' }}>
-                <Image style={{ alignSelf: 'center', height: 200, width: '100%' }} resizeMode="cover" source={require("../../../assets/no-image.png")} />
+                <Image style={{ alignSelf: 'center', height: 200, width: '100%' }} resizeMode="cover" source={(this.state.restaurant.photos && this.state.restaurant.photos.length > 0) ? { uri: this.state.restaurant.photos[0] } : require("../../../assets/no-image.png")} />
               </View>
               <View style={{ flex: 1, marginHorizontal: 15, marginTop: 15, marginBottom: 5, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 5 }}>
                 <Text style={{ fontSize: 24 }}>{this.state.restaurant.name}</Text>
@@ -196,6 +127,10 @@ class Restaurant extends Component {
               <View style={{ flex: 1, marginHorizontal: 15, marginVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 5 }}>
                 <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Averages Cost</Text>
                 <Text>Starting from {this.state.restaurant.lowCost ? this.state.restaurant.lowCost : 0} - {this.state.restaurant.highestCost ? this.state.restaurant.highestCost : 0}</Text>
+              </View>
+              <View style={{ flex: 1, marginHorizontal: 15, marginVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 5 }}>
+                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Phone Number</Text>
+                <Text>{this.state.restaurant.phone ? this.state.restaurant.phone : "-"}</Text>
               </View>
               <View style={{ flex: 1, marginHorizontal: 15, marginVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 5 }}>
                 <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Menu</Text>
@@ -212,7 +147,7 @@ class Restaurant extends Component {
               <View style={{ flex: 1, marginHorizontal: 15, marginVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 5 }}>
                 <Text>{this.state.restaurant.address}</Text>
                 {this.state.restaurant ? (this.filterOpenHours(this.state.restaurant.openingHours) === 'open' ? (
-                  <Text>Open: {this.state.restaurant.openingHours ? moment(this.state.openHours.open).format("HH:mm") : null} - {this.state.restaurant.openingHours ? moment(this.state.openHours.close).format("HH:mm") : null}</Text>
+                  <Text style={{ color: 'lime', marginVertical: 10 }}>Open: {this.state.openHours.startHours ? moment(this.state.openHours.endHours).format("HH:mm") : null} - {this.state.openHours.close ? moment(this.state.openHours.close).format("HH:mm") : null}</Text>
                 ) : (
                     <Text style={{ color: 'red' }}>Sorry, the restaurant is closed today</Text>
                   )) : "-"}
@@ -222,7 +157,9 @@ class Restaurant extends Component {
                 <List>
                   {
                     this.state.restaurant.facilities ? this.state.restaurant.facilities.filter(fac => fac.selected === true).map(fac => (
-                      <ListItem key={fac._id}><Text>{fac.name}</Text></ListItem>
+                      <ListItem key={fac.name}>
+                        <Text>{fac.name}</Text>
+                      </ListItem>
                     )) : null
                   }
                 </List>
@@ -241,7 +178,7 @@ class Restaurant extends Component {
                     </Button>
                   </View>
                 ) : (
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginVertical: 15 }}>
                       <Text>This Restaurant not Available for Book Table.</Text>
                     </View>
                   )

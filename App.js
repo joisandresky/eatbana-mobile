@@ -25,23 +25,24 @@ import Search from "./src/screens/Search/Search";
 import Profile from "./src/screens/Profile/Profile";
 import Restaurant from './src/screens/Restaurant/Restaurant';
 import SearchResult from './src/screens/Search/SearchResult/SearchResult';
+import CreateReservation from './src/screens/Reservation/CreateReservation';
 
 const AppTabNav = createBottomTabNavigator({
-  Discover: {
-    screen: Discover,
-    navigationOptions: {
-      tabBarLabel: 'TEMUKAN',
-      tabBarIcon: ({ tintColor }) => (
-        <Icon name="pin" size={24} color={tintColor} type="Ionicons" />
-      )
-    }
-  },
   Search: {
     screen: Search,
     navigationOptions: {
       tabBarLabel: 'CARI',
       tabBarIcon: ({ tintColor }) => (
         <Icon name="search" size={24} color={tintColor} type="Ionicons" />
+      )
+    }
+  },
+  Discover: {
+    screen: Discover,
+    navigationOptions: {
+      tabBarLabel: 'TEMUKAN',
+      tabBarIcon: ({ tintColor }) => (
+        <Icon name="pin" size={24} color={tintColor} type="Ionicons" />
       )
     }
   },
@@ -88,6 +89,9 @@ const AppStackNavigator = createStackNavigator({
   },
   SearchResult: {
     screen: SearchResult
+  },
+  CreateReservation: {
+    screen: CreateReservation
   }
 }, {
     initialRouteName: 'AppTab'

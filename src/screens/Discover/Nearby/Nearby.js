@@ -19,7 +19,7 @@ class Nearby extends Component {
             <TouchableOpacity key={res._id} onPress={() => this.goToRestaurant(res._id, res.name)}>
               <Card>
                 <CardItem cardBody>
-                  <Image style={{ alignSelf: 'center', height: 130, width: '100%' }} resizeMode="cover" source={require("../../../../assets/no-image.png")} />
+                  <Image style={{ alignSelf: 'center', height: 130, width: '100%' }} resizeMode="cover" source={res.photos.length > 0 ? { uri: res.photos[0] } : require("../../../../assets/no-image.png")} />
                 </CardItem>
                 <CardItem>
                   <Left style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'flex-start', flexDirection: 'column' }}>
